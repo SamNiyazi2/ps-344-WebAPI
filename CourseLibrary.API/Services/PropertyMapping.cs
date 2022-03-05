@@ -14,7 +14,7 @@ namespace CourseLibrary.API.Services
 
         public PropertyMapping(Dictionary<string, PropertyMappingValue> mappingDictionary)
         {
-            MappingDictionary = mappingDictionary ?? throw new NullReferenceException($"ps-344-webApi-20220305-0909: Null [{nameof(mappingDictionary)}]");
+            MappingDictionary = mappingDictionary ?? throw new ArgumentNullException($"ps-344-webApi-20220305-0909: Null [{nameof(mappingDictionary)}]");
         }
     }
 }
