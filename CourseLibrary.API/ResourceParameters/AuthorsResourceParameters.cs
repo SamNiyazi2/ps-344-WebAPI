@@ -29,5 +29,8 @@ namespace CourseLibrary.API.ResourceParameters
         // 03/05/2022 06:50 am - SSN - [20220305-0647] - [001] - M03-03 - Demo - Sorting resource collections
         public string OrderBy { get; set; } = "Name";
 
+        // 03/05/2022 02:48 pm - SSN - [20220305-1446] - [001] - M04-04 - Demo - Data shaping collection resources
+        public string Fields { get; set; }
+
     }
 }

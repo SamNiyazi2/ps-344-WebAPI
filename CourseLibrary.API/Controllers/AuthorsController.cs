@@ -33,7 +33,9 @@ namespace CourseLibrary.API.Controllers
 
         [HttpGet(Name = "GetAuthors")]
         [HttpHead]
-        public ActionResult<IEnumerable<AuthorDto>> GetAuthors(
+        // 03/05/2022 02:49 pm - SSN - [20220305-1446] - [002] - M04-04 - Demo - Data shaping collection resources
+        //public ActionResult<IEnumerable<AuthorDto>> GetAuthors(
+        public ActionResult GetAuthors(
             [FromQuery] AuthorsResourceParameters authorsResourceParameters)
         {
 
@@ -60,7 +62,7 @@ namespace CourseLibrary.API.Controllers
 
                 #endregion [20220304-2120] 
 
-                return Ok(_mapper.Map<IEnumerable<AuthorDto>>(authorsFromRepo));
+                return Ok(_mapper.Map<IEnumerable<AuthorDto>>(authorsFromRepo).ShapeData(authorsResourceParameters.Fields));  
 
             }
             catch (Exception ex)
@@ -144,6 +146,7 @@ namespace CourseLibrary.API.Controllers
             return Url.Link("GetAuthors",
                                 new
                                 {
+                                    fields = authorsResourceParameters.Fields,
                                     pageNumber = authorsResourceParameters.PageNumber + skipValue,
                                     pageSize = authorsResourceParameters.PageSize,
                                     mainCategory = authorsResourceParameters.MainCategory,
