@@ -41,25 +41,25 @@ namespace CourseLibrary.API
             {
                 setupAction.InvalidModelStateResponseFactory = context =>
                 {
-                // create a problem details object
-                var problemDetailsFactory = context.HttpContext.RequestServices
-                        .GetRequiredService<ProblemDetailsFactory>();
+                    // create a problem details object
+                    var problemDetailsFactory = context.HttpContext.RequestServices
+                            .GetRequiredService<ProblemDetailsFactory>();
                     var problemDetails = problemDetailsFactory.CreateValidationProblemDetails(
                             context.HttpContext,
                             context.ModelState);
 
-                // add additional info not added by default
-                problemDetails.Detail = "See the errors field for details.";
+                    // add additional info not added by default
+                    problemDetails.Detail = "See the errors field for details.";
                     problemDetails.Instance = context.HttpContext.Request.Path;
 
-                // find out which status code to use
-                var actionExecutingContext =
-                          context as Microsoft.AspNetCore.Mvc.Filters.ActionExecutingContext;
+                    // find out which status code to use
+                    var actionExecutingContext =
+                              context as Microsoft.AspNetCore.Mvc.Filters.ActionExecutingContext;
 
-                // if there are modelstate errors & all arguments were correctly
-                // found/parsed we're dealing with validation errors
-                if ((context.ModelState.ErrorCount > 0) &&
-                        (actionExecutingContext?.ActionArguments.Count == context.ActionDescriptor.Parameters.Count))
+                    // if there are modelstate errors & all arguments were correctly
+                    // found/parsed we're dealing with validation errors
+                    if ((context.ModelState.ErrorCount > 0) &&
+                            (actionExecutingContext?.ActionArguments.Count == context.ActionDescriptor.Parameters.Count))
                     {
                         problemDetails.Type = "https://courselibrary.com/modelvalidationproblem";
                         problemDetails.Status = StatusCodes.Status422UnprocessableEntity;
@@ -71,9 +71,9 @@ namespace CourseLibrary.API
                         };
                     }
 
-                // if one of the arguments wasn't correctly found / couldn't be parsed
-                // we're dealing with null/unparseable input
-                problemDetails.Status = StatusCodes.Status400BadRequest;
+                    // if one of the arguments wasn't correctly found / couldn't be parsed
+                    // we're dealing with null/unparseable input
+                    problemDetails.Status = StatusCodes.Status400BadRequest;
                     problemDetails.Title = "One or more errors on input occurred.";
                     return new BadRequestObjectResult(problemDetails)
                     {
@@ -86,11 +86,17 @@ namespace CourseLibrary.API
 
             services.AddScoped<ICourseLibraryRepository, CourseLibraryRepository>();
 
+            // 03/04/2022 05:03 pm - SSN
+            string connectionString = Environment.GetEnvironmentVariable("PS_344_ConnectionString");
+            if (string.IsNullOrWhiteSpace(connectionString))
+            {
+                throw new Exception("ps-344-webAPI-20220304-1704: Missing or empty environment variable [PS_344_ConnectionString]");
+            }
+
             services.AddDbContext<CourseLibraryContext>(options =>
             {
-                options.UseSqlServer(
-                    @"Server=(localdb)\mssqllocaldb;Database=CourseLibraryDB;Trusted_Connection=True;");
-            }); 
+                options.UseSqlServer(connectionString);
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

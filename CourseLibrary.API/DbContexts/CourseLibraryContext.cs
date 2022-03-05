@@ -16,6 +16,9 @@ namespace CourseLibrary.API.DbContexts
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            // 03/04/2022 05:02 pm - SSN
+            modelBuilder.HasDefaultSchema("ps-344");
+
             // seed the database with dummy data
             modelBuilder.Entity<Author>().HasData(
                 new Author()

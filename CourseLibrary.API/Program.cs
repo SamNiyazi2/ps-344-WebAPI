@@ -23,7 +23,7 @@ namespace CourseLibrary.API
                     var context = scope.ServiceProvider.GetService<CourseLibraryContext>();
                     // for demo purposes, delete the database & migrate on startup so 
                     // we can start with a clean slate
-                    context.Database.EnsureDeleted();
+                    ///////////////////////////////////////////////////////////////context.Database.EnsureDeleted();
                     context.Database.Migrate();
                 }
                 catch (Exception ex)
@@ -37,7 +37,7 @@ namespace CourseLibrary.API
             host.Run();
         }
 
-        
+
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>

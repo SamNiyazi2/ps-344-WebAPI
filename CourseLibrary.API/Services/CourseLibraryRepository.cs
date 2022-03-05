@@ -11,7 +11,7 @@ namespace CourseLibrary.API.Services
     {
         private readonly CourseLibraryContext _context;
 
-        public CourseLibraryRepository(CourseLibraryContext context )
+        public CourseLibraryRepository(CourseLibraryContext context)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
         }
@@ -29,14 +29,14 @@ namespace CourseLibrary.API.Services
             }
             // always set the AuthorId to the passed-in authorId
             course.AuthorId = authorId;
-            _context.Courses.Add(course); 
-        }         
+            _context.Courses.Add(course);
+        }
 
         public void DeleteCourse(Course course)
         {
             _context.Courses.Remove(course);
         }
-  
+
         public Course GetCourse(Guid authorId, Guid courseId)
         {
             if (authorId == Guid.Empty)
@@ -107,7 +107,7 @@ namespace CourseLibrary.API.Services
 
             _context.Authors.Remove(author);
         }
-        
+
         public Author GetAuthor(Guid authorId)
         {
             if (authorId == Guid.Empty)
@@ -130,11 +130,12 @@ namespace CourseLibrary.API.Services
                 throw new ArgumentNullException(nameof(authorsResourceParameters));
             }
 
-            if (string.IsNullOrWhiteSpace(authorsResourceParameters.MainCategory)
-                 && string.IsNullOrWhiteSpace(authorsResourceParameters.SearchQuery))
-            {
-                return GetAuthors();
-            }
+            // 03/04/2022 05:12 pm - SSN - [20220304-1649] - [003] - M02-07 - Demo = Paging through collection resources
+            //if (string.IsNullOrWhiteSpace(authorsResourceParameters.MainCategory)
+            //     && string.IsNullOrWhiteSpace(authorsResourceParameters.SearchQuery))
+            //{
+            //    return GetAuthors();
+            //}
 
             var collection = _context.Authors as IQueryable<Author>;
 
@@ -152,6 +153,14 @@ namespace CourseLibrary.API.Services
                     || a.FirstName.Contains(searchQuery)
                     || a.LastName.Contains(searchQuery));
             }
+
+
+            // 03/04/2022 05:08 pm - SSN - [20220304-1649] - [002] - M02-07 - Demo = Paging through collection resources
+
+            int pageNumber = authorsResourceParameters.PageNumber;
+            int pageSize = authorsResourceParameters.PageSize;
+
+            collection = collection.Skip(pageSize * (pageNumber - 1)).Take(pageSize);
 
             return collection.ToList();
         }
@@ -189,7 +198,7 @@ namespace CourseLibrary.API.Services
         {
             if (disposing)
             {
-               // dispose resources when needed
+                // dispose resources when needed
             }
         }
     }
