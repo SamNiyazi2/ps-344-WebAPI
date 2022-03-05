@@ -136,8 +136,9 @@ namespace CourseLibrary.API.Controllers
                                     pageNumber = authorsResourceParameters.PageNumber + skipValue,
                                     pageSize = authorsResourceParameters.PageSize,
                                     mainCategory = authorsResourceParameters.MainCategory,
-                                    searchQuery = authorsResourceParameters.SearchQuery
-                                });
+                                    searchQuery = authorsResourceParameters.SearchQuery,
+                                    orderBy = authorsResourceParameters.OrderBy
+                                }));
         }
 
     }
