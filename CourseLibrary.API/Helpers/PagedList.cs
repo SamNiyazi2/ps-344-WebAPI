@@ -23,15 +23,15 @@ namespace CourseLibrary.API.Helpers
             TotalCount = totalCount;
             PageSize = pageSize;
             CurrentPage = pageNumber;
-            TotalPages = (int)Math.Ceiling(Count / (double)pageSize);
+            TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
             AddRange(items);
         }
 
-        public static PagedList<T> Create(IQueryable<T> source, int pageNumberm, int pageSize)
+        public static PagedList<T> Create(IQueryable<T> source, int pageNumber, int pageSize)
         {
             var count = source.Count();
-            var items = source.Skip((pageNumberm - 1) * pageSize).Take(pageSize).ToList();
-            return new PagedList<T>(items, count, pageNumberm, pageSize);
+            var items = source.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToList();
+            return new PagedList<T>(items, count, pageNumber, pageSize);
 
         }
 

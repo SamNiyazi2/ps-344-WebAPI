@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace CourseLibrary.API.Controllers
@@ -27,16 +28,39 @@ namespace CourseLibrary.API.Controllers
                 throw new ArgumentNullException(nameof(mapper));
         }
 
-        [HttpGet()]
+
+        // 03/04/2022 09:24 pm - SSN - [20220304-2120] - [001] - M02-10 - Demo - Returning pagination metadata
+
+        [HttpGet(Name = "GetAuthors")]
         [HttpHead]
         public ActionResult<IEnumerable<AuthorDto>> GetAuthors(
             [FromQuery] AuthorsResourceParameters authorsResourceParameters)
         {
             var authorsFromRepo = _courseLibraryRepository.GetAuthors(authorsResourceParameters);
+
+            #region [20220304-2120] 
+            var previousPageLink = authorsFromRepo.HasPreviousPage ? createAuthorResourceUri(authorsResourceParameters, ResourceUriType.PreviousPage) : null;
+            var nextPageLink = authorsFromRepo.HasNextPage ? createAuthorResourceUri(authorsResourceParameters, ResourceUriType.NextPage) : null;
+
+            var pagingMetaData = new
+            {
+                totalCount = authorsFromRepo.TotalCount,
+                pageSize = authorsFromRepo.PageSize,
+                currentPage = authorsFromRepo.CurrentPage,
+                totalPages = authorsFromRepo.TotalPages,
+                previousPageLink,
+                nextPageLink
+            };
+
+            Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(pagingMetaData));
+
+            #endregion [20220304-2120] 
+
+
             return Ok(_mapper.Map<IEnumerable<AuthorDto>>(authorsFromRepo));
         }
 
-        [HttpGet("{authorId}", Name ="GetAuthor")]
+        [HttpGet("{authorId}", Name = "GetAuthor")]
         public IActionResult GetAuthor(Guid authorId)
         {
             var authorFromRepo = _courseLibraryRepository.GetAuthor(authorId);
@@ -45,7 +69,7 @@ namespace CourseLibrary.API.Controllers
             {
                 return NotFound();
             }
-             
+
             return Ok(_mapper.Map<AuthorDto>(authorFromRepo));
         }
 
@@ -85,5 +109,36 @@ namespace CourseLibrary.API.Controllers
 
             return NoContent();
         }
+
+
+        // 03/04/2022 09:25 pm - SSN - [20220304-2120] - [002] - M02-10 - Demo - Returning pagination metadata
+        private string createAuthorResourceUri(AuthorsResourceParameters authorsResourceParameters, ResourceUriType resourceUriType)
+        {
+            switch (resourceUriType)
+            {
+                case ResourceUriType.PreviousPage:
+                    return CreateLink(authorsResourceParameters, -1);
+
+                case ResourceUriType.NextPage:
+                    return CreateLink(authorsResourceParameters, 1);
+
+                default:
+                    return CreateLink(authorsResourceParameters, 0);
+
+            }
+        }
+
+        private string CreateLink(AuthorsResourceParameters authorsResourceParameters, int skipValue)
+        {
+            return Url.Link("GetAuthors",
+                                new
+                                {
+                                    pageNumber = authorsResourceParameters.PageNumber + skipValue,
+                                    pageSize = authorsResourceParameters.PageSize,
+                                    mainCategory = authorsResourceParameters.MainCategory,
+                                    searchQuery = authorsResourceParameters.SearchQuery
+                                });
+        }
+
     }
 }
