@@ -26,5 +26,8 @@ namespace CourseLibrary.API.ResourceParameters
         }
 
 
+        // 03/05/2022 06:50 am - SSN - [20220305-0647] - [001] - M03-03 - Demo - Sorting resource collections
+        public string OrderBy { get; set; } = "Name";
+
     }
 }

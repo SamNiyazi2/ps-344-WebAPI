@@ -159,6 +159,15 @@ namespace CourseLibrary.API.Services
             }
 
 
+            // 03/05/2022 06:53 am - SSN - [20220305-0647] - [002] - M03-03 - Demo - Sorting resource collections
+            if (!string.IsNullOrWhiteSpace(authorsResourceParameters.OrderBy))
+            {
+                if (authorsResourceParameters.OrderBy.Trim().ToLower() == "name")
+                {
+                    collection = collection.OrderBy(a => a.LastName).ThenBy(a => a.FirstName);
+                }
+            }
+
             // 03/04/2022 05:08 pm - SSN - [20220304-1649] - [002] - M02-07 - Demo = Paging through collection resources
 
             int pageNumber = authorsResourceParameters.PageNumber;
