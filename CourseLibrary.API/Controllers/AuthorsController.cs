@@ -36,28 +36,39 @@ namespace CourseLibrary.API.Controllers
         public ActionResult<IEnumerable<AuthorDto>> GetAuthors(
             [FromQuery] AuthorsResourceParameters authorsResourceParameters)
         {
-            var authorsFromRepo = _courseLibraryRepository.GetAuthors(authorsResourceParameters);
 
-            #region [20220304-2120] 
-            var previousPageLink = authorsFromRepo.HasPreviousPage ? createAuthorResourceUri(authorsResourceParameters, ResourceUriType.PreviousPage) : null;
-            var nextPageLink = authorsFromRepo.HasNextPage ? createAuthorResourceUri(authorsResourceParameters, ResourceUriType.NextPage) : null;
-
-            var pagingMetaData = new
+            try
             {
-                totalCount = authorsFromRepo.TotalCount,
-                pageSize = authorsFromRepo.PageSize,
-                currentPage = authorsFromRepo.CurrentPage,
-                totalPages = authorsFromRepo.TotalPages,
-                previousPageLink,
-                nextPageLink
-            };
 
-            Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(pagingMetaData));
+                var authorsFromRepo = _courseLibraryRepository.GetAuthors(authorsResourceParameters);
 
-            #endregion [20220304-2120] 
+                #region [20220304-2120] 
+                var previousPageLink = authorsFromRepo.HasPreviousPage ? createAuthorResourceUri(authorsResourceParameters, ResourceUriType.PreviousPage) : null;
+                var nextPageLink = authorsFromRepo.HasNextPage ? createAuthorResourceUri(authorsResourceParameters, ResourceUriType.NextPage) : null;
 
+                var pagingMetaData = new
+                {
+                    totalCount = authorsFromRepo.TotalCount,
+                    pageSize = authorsFromRepo.PageSize,
+                    currentPage = authorsFromRepo.CurrentPage,
+                    totalPages = authorsFromRepo.TotalPages,
+                    previousPageLink,
+                    nextPageLink
+                };
 
-            return Ok(_mapper.Map<IEnumerable<AuthorDto>>(authorsFromRepo));
+                Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(pagingMetaData));
+
+                #endregion [20220304-2120] 
+
+                return Ok(_mapper.Map<IEnumerable<AuthorDto>>(authorsFromRepo));
+
+            }
+            catch (Exception ex)
+            {
+                // Todo: Need log.
+                return ValidationProblem(ex.Message);
+            }
+
         }
 
         [HttpGet("{authorId}", Name = "GetAuthor")]
@@ -138,7 +149,7 @@ namespace CourseLibrary.API.Controllers
                                     mainCategory = authorsResourceParameters.MainCategory,
                                     searchQuery = authorsResourceParameters.SearchQuery,
                                     orderBy = authorsResourceParameters.OrderBy
-                                }));
+                                });
         }
 
     }
