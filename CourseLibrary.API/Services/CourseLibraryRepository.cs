@@ -1,5 +1,6 @@
 ﻿using CourseLibrary.API.DbContexts;
 using CourseLibrary.API.Entities;
+using CourseLibrary.API.Helpers;
 using CourseLibrary.API.ResourceParameters;
 using System;
 using System.Collections.Generic;
@@ -123,7 +124,10 @@ namespace CourseLibrary.API.Services
             return _context.Authors.ToList<Author>();
         }
 
-        public IEnumerable<Author> GetAuthors(AuthorsResourceParameters authorsResourceParameters)
+        // 03/04/2022 07:50 pm - SSN - [20220304-1924] - [003] - M02-09 - Demo - Improving reuse with a PagedList<T> class
+
+        //        public IEnumerable<Author> GetAuthors(AuthorsResourceParameters authorsResourceParameters)
+        public PagedList<Author> GetAuthors(AuthorsResourceParameters authorsResourceParameters)
         {
             if (authorsResourceParameters == null)
             {
@@ -160,9 +164,12 @@ namespace CourseLibrary.API.Services
             int pageNumber = authorsResourceParameters.PageNumber;
             int pageSize = authorsResourceParameters.PageSize;
 
-            collection = collection.Skip(pageSize * (pageNumber - 1)).Take(pageSize);
+            // 03/04/2022 07:51 pm - SSN - [20220304-1924] - [004] - M02-09 - Demo - Improving reuse with a PagedList<T> class
+            // collection = collection.Skip(pageSize * (pageNumber - 1)).Take(pageSize);
+            // return collection.ToList();
 
-            return collection.ToList();
+            return PagedList<Author>.Create(collection, pageNumber, pageSize);
+
         }
 
         public IEnumerable<Author> GetAuthors(IEnumerable<Guid> authorIds)
