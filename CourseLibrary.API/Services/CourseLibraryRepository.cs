@@ -1,6 +1,7 @@
 ﻿using CourseLibrary.API.DbContexts;
 using CourseLibrary.API.Entities;
 using CourseLibrary.API.Helpers;
+using CourseLibrary.API.Models;
 using CourseLibrary.API.ResourceParameters;
 using System;
 using System.Collections.Generic;
@@ -11,10 +12,14 @@ namespace CourseLibrary.API.Services
     public class CourseLibraryRepository : ICourseLibraryRepository, IDisposable
     {
         private readonly CourseLibraryContext _context;
+        private readonly IPropertyMappingService propertyMappingService;
 
-        public CourseLibraryRepository(CourseLibraryContext context)
+        // 03/05/2022 09:45 am - SSN - [20220305-0715] - [008] - M03-05 - Creating a property mapping service
+        // Add IPropertyMappingService
+        public CourseLibraryRepository(CourseLibraryContext context, IPropertyMappingService propertyMappingService)
         {
-            _context = context ?? throw new ArgumentNullException(nameof(context));
+            _context = context ?? throw new ArgumentNullException(nameof(context)) ?? throw new ArgumentNullException($"ps-344-webAPI-20220305-0947: Null [{nameof(context)}]"); ;
+            this.propertyMappingService = propertyMappingService ?? throw new ArgumentNullException($"ps-344-webAPI-20220305-0948: Null [{nameof(propertyMappingService)}]");
         }
 
         public void AddCourse(Guid authorId, Course course)
@@ -162,10 +167,12 @@ namespace CourseLibrary.API.Services
             // 03/05/2022 06:53 am - SSN - [20220305-0647] - [002] - M03-03 - Demo - Sorting resource collections
             if (!string.IsNullOrWhiteSpace(authorsResourceParameters.OrderBy))
             {
-                if (authorsResourceParameters.OrderBy.Trim().ToLower() == "name")
-                {
-                    collection = collection.OrderBy(a => a.LastName).ThenBy(a => a.FirstName);
-                }
+                //if (authorsResourceParameters.OrderBy.Trim().ToLower() == "name")
+                //{
+                //    collection = collection.OrderBy(a => a.LastName).ThenBy(a => a.FirstName);
+                //}
+
+                collection = collection.ApplySort(authorsResourceParameters.OrderBy, propertyMappingService.GetPropertyMapping<AuthorDto, Author>());
             }
 
             // 03/04/2022 05:08 pm - SSN - [20220304-1649] - [002] - M02-07 - Demo = Paging through collection resources

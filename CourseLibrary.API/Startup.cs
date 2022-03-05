@@ -82,6 +82,11 @@ namespace CourseLibrary.API
                 };
             });
 
+            // 03/05/2022 09:43 am - SSN - [20220305-0715] - [007] - M03-05 - Creating a property mapping service
+            // services.AddTransient<IPropertyMappingService, PropertyMappingService>();
+            services.AddSingleton<IPropertyMappingService, PropertyMappingService>();
+
+
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
             services.AddScoped<ICourseLibraryRepository, CourseLibraryRepository>();
