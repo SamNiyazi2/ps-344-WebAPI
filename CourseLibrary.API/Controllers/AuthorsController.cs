@@ -66,7 +66,7 @@ namespace CourseLibrary.API.Controllers
 
 
                 // 03/06/2022 09:06 pm - SSN - [20220306-2054] - [003] - M05-06 - Demo - Implementing HATEOAS support for collection resource
-                var links = createLinksForAuthors(authorsResourceParameters);
+                var links = createLinksForAuthors(authorsResourceParameters, authorsFromRepo.HasPreviousPage, authorsFromRepo.HasNextPage);
                 var shapedAuthors = _mapper.Map<IEnumerable<AuthorDto>>(authorsFromRepo).ShapeData_v2(authorsResourceParameters.Fields);
 
                 var shapedAuthorsWithLinks = shapedAuthors.Select(author =>
@@ -82,10 +82,10 @@ namespace CourseLibrary.API.Controllers
 
                 // return Ok(_mapper.Map<IEnumerable<AuthorDto>>(authorsFromRepo).ShapeData_v2(authorsResourceParameters.Fields));
                 var linkedCollectionResource = new
-                        {
-                            value = shapedAuthorsWithLinks,
-                            links
-                        };
+                {
+                    value = shapedAuthorsWithLinks,
+                    links
+                };
 
                 // return Ok(_mapper.Map<IEnumerable<AuthorDto>>(authorsFromRepo).ShapeData_v2(authorsResourceParameters.Fields));
                 return Ok(linkedCollectionResource);
@@ -238,11 +238,24 @@ namespace CourseLibrary.API.Controllers
         }
 
         // 03/06/2022 08:59 pm - SSN - [20220306-2054] - [001] - M05-06 - Demo - Implementing HATEOAS support for collection resource
-        private IEnumerable<LinkDTO> createLinksForAuthors(AuthorsResourceParameters authorsResourceParameters)
+        private IEnumerable<LinkDTO> createLinksForAuthors(AuthorsResourceParameters authorsResourceParameters, bool hasPrevious, bool hasNext)
         {
             var links = new List<LinkDTO>();
 
             links.Add(new LinkDTO(createAuthorResourceUri(authorsResourceParameters, ResourceUriType.Current), "self", "GET"));
+
+            if (hasPrevious)
+            {
+
+                links.Add(new LinkDTO(createAuthorResourceUri(authorsResourceParameters, ResourceUriType.PreviousPage), "previous-page", "GET"));
+            }
+
+            if (hasNext)
+            {
+
+                links.Add(new LinkDTO(createAuthorResourceUri(authorsResourceParameters, ResourceUriType.NextPage), "next-page", "GET"));
+            }
+
 
             return links;
 
