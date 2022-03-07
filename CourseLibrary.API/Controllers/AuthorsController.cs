@@ -62,7 +62,9 @@ namespace CourseLibrary.API.Controllers
 
                 #endregion [20220304-2120] 
 
-                return Ok(_mapper.Map<IEnumerable<AuthorDto>>(authorsFromRepo).ShapeData(authorsResourceParameters.Fields));  
+                // 03/06/2022 05:33 pm - SSN - [20220305-1512] - [006] - M04-05 - Demo - Data shaping single resources
+                // return Ok(_mapper.Map<IEnumerable<AuthorDto>>(authorsFromRepo).ShapeData(authorsResourceParameters.Fields));
+                return Ok(_mapper.Map<IEnumerable<AuthorDto>>(authorsFromRepo).ShapeData_v2(authorsResourceParameters.Fields));
 
             }
             catch (Exception ex)
@@ -74,7 +76,9 @@ namespace CourseLibrary.API.Controllers
         }
 
         [HttpGet("{authorId}", Name = "GetAuthor")]
-        public IActionResult GetAuthor(Guid authorId)
+        // 03/06/2022 04:46 pm - SSN - [20220305-1512] - [002] - M04-05 - Demo - Data shaping single resources
+        // Add fields
+        public IActionResult GetAuthor(Guid authorId, string fields)
         {
             var authorFromRepo = _courseLibraryRepository.GetAuthor(authorId);
 
@@ -83,7 +87,9 @@ namespace CourseLibrary.API.Controllers
                 return NotFound();
             }
 
-            return Ok(_mapper.Map<AuthorDto>(authorFromRepo));
+            // 03/06/2022 04:47 pm - SSN - [20220305-1512] - [003] - M04-05 - Demo - Data shaping single resources
+            // return Ok(_mapper.Map<AuthorDto>(authorFromRepo));
+            return Ok(_mapper.Map<AuthorDto>(authorFromRepo).ShapeData_v2(fields));
         }
 
         [HttpPost]

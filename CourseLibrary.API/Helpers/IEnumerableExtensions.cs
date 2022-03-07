@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
@@ -57,6 +58,73 @@ namespace CourseLibrary.API.Helpers
                     var propertyValue = propertyInfo.GetValue(sourceObject);
 
                     ((IDictionary<string, object>)dataShapedObject).Add(propertyInfo.Name, propertyValue);
+                }
+
+                expandoObjectList.Add(dataShapedObject);
+
+            }
+
+            return expandoObjectList;
+
+        }
+
+
+
+
+
+
+
+
+        // 03/06/2022 05:21 pm - SSN - [20220305-1512] - [005] - M04-05 - Demo - Data shaping single resources
+        static ConcurrentDictionary<Type, PropertyInfo[]> sourceData = new System.Collections.Concurrent.ConcurrentDictionary<Type, PropertyInfo[]>();
+
+        public static IEnumerable<ExpandoObject> ShapeData_v2<TSource>(this IEnumerable<TSource> source, string fields)
+        {
+            if (source == null)
+            {
+                throw new ArgumentNullException($"ps-344-webAPI-20220305-1420: Null [{nameof(source)}]");
+            }
+
+
+            if (!sourceData.TryGetValue(source.GetType(), out PropertyInfo[] propertyInfos))
+            {
+                propertyInfos = typeof(TSource)
+                        .GetProperties(BindingFlags.IgnoreCase |
+                        BindingFlags.Public | BindingFlags.Instance);
+
+                sourceData.TryAdd(source.GetType(), propertyInfos);
+
+            }
+
+
+            string[] fieldsAfterSplit = { };
+
+            if (!string.IsNullOrWhiteSpace(fields))
+            {
+
+                fieldsAfterSplit = fields.Split(',');
+
+                foreach (string fieldName in fieldsAfterSplit)
+                {
+                    if (!propertyInfos.Any(r => r.Name.ToLower() == fieldName.Trim().ToLower()))
+                    {
+                        throw new Exception($"ps-344-webAPI-20220306-1731: Property {fieldName} was not found on {typeof(TSource)}");
+                    }
+                }
+
+            }
+
+
+            var expandoObjectList = new List<ExpandoObject>();
+
+            foreach (TSource sourceObject in source)
+            {
+                var dataShapedObject = new ExpandoObject();
+
+                foreach (var propertyInfo in propertyInfos.Where(r => string.IsNullOrWhiteSpace(fields) || fieldsAfterSplit.Any(r2 =>
+               r2.ToString().ToLower().Trim() == r.Name.ToLower())))
+                {
+                    ((IDictionary<string, object>)dataShapedObject).Add(propertyInfo.Name, propertyInfo.GetValue(sourceObject));
                 }
 
                 expandoObjectList.Add(dataShapedObject);
