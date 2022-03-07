@@ -6,9 +6,11 @@ using CourseLibrary.API.Services;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
+
 
 namespace CourseLibrary.API.Controllers
 {
@@ -91,9 +93,17 @@ namespace CourseLibrary.API.Controllers
                     return NotFound();
                 }
 
+                // 03/06/2022 08:07 pm - SSN - [20220306-1937] - [003] - M05-04 - Demo - Implementing HATEOAS support for a single resource
+                var links = CreateLinksForAuthor(authorId, fields);
+
                 // 03/06/2022 04:47 pm - SSN - [20220305-1512] - [003] - M04-05 - Demo - Data shaping single resources
                 // return Ok(_mapper.Map<AuthorDto>(authorFromRepo));
-                return Ok(_mapper.Map<AuthorDto>(authorFromRepo).ShapeData_v2(fields));
+
+                //return Ok(_mapper.Map<AuthorDto>(authorFromRepo).ShapeData_v2(fields));
+                var dic = _mapper.Map<AuthorDto>(authorFromRepo).ShapeData_v2(fields) as IDictionary<string, object>;
+                dic.Add("links", links);
+
+                return Ok(dic);
 
             }
             catch (Exception ex)
@@ -124,7 +134,7 @@ namespace CourseLibrary.API.Controllers
             return Ok();
         }
 
-        [HttpDelete("{authorId}")]
+        [HttpDelete("{authorId}", Name = "DeleteAuthor")]
         public ActionResult DeleteAuthor(Guid authorId)
         {
             var authorFromRepo = _courseLibraryRepository.GetAuthor(authorId);
@@ -173,5 +183,24 @@ namespace CourseLibrary.API.Controllers
                                 });
         }
 
+
+        // 03/06/2022 07:44 pm - SSN - [20220306-1937] - [002] - M05-04 - Demo - Implementing HATEOAS support for a single resource
+        private IEnumerable<LinkDTO> CreateLinksForAuthor(Guid authorId, string fields)
+        {
+            var links = new List<LinkDTO>();
+
+            var payLoad = new ExpandoObject();
+
+            ((IDictionary<string, object>)payLoad).Add("authorId", authorId);
+
+            if (!string.IsNullOrWhiteSpace(fields)) ((IDictionary<string, object>)payLoad).Add("fields", fields);
+
+            links.Add(new LinkDTO(Url.Link("GetAuthor", payLoad), "self", "GET"));
+            links.Add(new LinkDTO(Url.Link("DeleteAuthor", new { authorId }), "delete_author", "GET"));
+            links.Add(new LinkDTO(Url.Link("CreateCourseForAuthor", new { authorId }), "create_course_for_author", "POST"));
+            links.Add(new LinkDTO(Url.Link("GetCoursesForAuthor", new { authorId }), "get_courses_for_author", "GET"));
+
+            return links;
+        }
     }
 }
