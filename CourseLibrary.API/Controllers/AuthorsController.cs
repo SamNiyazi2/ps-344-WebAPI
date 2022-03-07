@@ -80,16 +80,28 @@ namespace CourseLibrary.API.Controllers
         // Add fields
         public IActionResult GetAuthor(Guid authorId, string fields)
         {
-            var authorFromRepo = _courseLibraryRepository.GetAuthor(authorId);
-
-            if (authorFromRepo == null)
+            // 03/06/2022 06:41 pm - SSN - [20220306-1816] - [001] - M04-06 - Demo - Taking consumer errors into account when shaping data
+            // Add try/catch block
+            try
             {
-                return NotFound();
-            }
+                var authorFromRepo = _courseLibraryRepository.GetAuthor(authorId);
 
-            // 03/06/2022 04:47 pm - SSN - [20220305-1512] - [003] - M04-05 - Demo - Data shaping single resources
-            // return Ok(_mapper.Map<AuthorDto>(authorFromRepo));
-            return Ok(_mapper.Map<AuthorDto>(authorFromRepo).ShapeData_v2(fields));
+                if (authorFromRepo == null)
+                {
+                    return NotFound();
+                }
+
+                // 03/06/2022 04:47 pm - SSN - [20220305-1512] - [003] - M04-05 - Demo - Data shaping single resources
+                // return Ok(_mapper.Map<AuthorDto>(authorFromRepo));
+                return Ok(_mapper.Map<AuthorDto>(authorFromRepo).ShapeData_v2(fields));
+
+            }
+            catch (Exception ex)
+            {
+
+                // Todo: Need log.
+                return ValidationProblem(ex.Message);
+            }
         }
 
         [HttpPost]
