@@ -64,9 +64,31 @@ namespace CourseLibrary.API.Controllers
 
                 #endregion [20220304-2120] 
 
+
+                // 03/06/2022 09:06 pm - SSN - [20220306-2054] - [003] - M05-06 - Demo - Implementing HATEOAS support for collection resource
+                var links = createLinksForAuthors(authorsResourceParameters);
+                var shapedAuthors = _mapper.Map<IEnumerable<AuthorDto>>(authorsFromRepo).ShapeData_v2(authorsResourceParameters.Fields);
+
+                var shapedAuthorsWithLinks = shapedAuthors.Select(author =>
+                      {
+                          var authorAsDic = author as IDictionary<string, object>;
+                          var authorLinks = CreateLinksForAuthor((Guid)authorAsDic["Id"], null);
+                          authorAsDic.Add("links", authorLinks);
+                          return authorAsDic;
+                      });
+
                 // 03/06/2022 05:33 pm - SSN - [20220305-1512] - [006] - M04-05 - Demo - Data shaping single resources
                 // return Ok(_mapper.Map<IEnumerable<AuthorDto>>(authorsFromRepo).ShapeData(authorsResourceParameters.Fields));
-                return Ok(_mapper.Map<IEnumerable<AuthorDto>>(authorsFromRepo).ShapeData_v2(authorsResourceParameters.Fields));
+
+                // return Ok(_mapper.Map<IEnumerable<AuthorDto>>(authorsFromRepo).ShapeData_v2(authorsResourceParameters.Fields));
+                var linkedCollectionResource = new
+                        {
+                            value = shapedAuthorsWithLinks,
+                            links
+                        };
+
+                // return Ok(_mapper.Map<IEnumerable<AuthorDto>>(authorsFromRepo).ShapeData_v2(authorsResourceParameters.Fields));
+                return Ok(linkedCollectionResource);
 
             }
             catch (Exception ex)
@@ -174,6 +196,7 @@ namespace CourseLibrary.API.Controllers
                 case ResourceUriType.NextPage:
                     return CreateLink(authorsResourceParameters, 1);
 
+                case ResourceUriType.Current:
                 default:
                     return CreateLink(authorsResourceParameters, 0);
 
@@ -212,6 +235,17 @@ namespace CourseLibrary.API.Controllers
             links.Add(new LinkDTO(Url.Link("GetCoursesForAuthor", new { authorId }), "get_courses_for_author", "GET"));
 
             return links;
+        }
+
+        // 03/06/2022 08:59 pm - SSN - [20220306-2054] - [001] - M05-06 - Demo - Implementing HATEOAS support for collection resource
+        private IEnumerable<LinkDTO> createLinksForAuthors(AuthorsResourceParameters authorsResourceParameters)
+        {
+            var links = new List<LinkDTO>();
+
+            links.Add(new LinkDTO(createAuthorResourceUri(authorsResourceParameters, ResourceUriType.Current), "self", "GET"));
+
+            return links;
+
         }
     }
 }

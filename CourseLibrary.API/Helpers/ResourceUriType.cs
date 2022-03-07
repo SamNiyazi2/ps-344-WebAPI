@@ -10,7 +10,11 @@ namespace CourseLibrary.API.Helpers
     public enum ResourceUriType
     {
         PreviousPage,
-        NextPage
+        NextPage,
+        
+        // 03/06/2022 09:03 pm - SSN - [20220306-2054] - [002] - M05-06 - Demo - Implementing HATEOAS support for collection resource
+
+        Current
     }
 
 }
