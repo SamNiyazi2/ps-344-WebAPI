@@ -122,9 +122,20 @@ namespace CourseLibrary.API.Controllers
             _courseLibraryRepository.Save();
 
             var authorToReturn = _mapper.Map<AuthorDto>(authorEntity);
+
+            // 03/06/2022 08:23 pm - SSN - [20220306-2018] - [001] - M05-05 - Demo - Implementng HATEOAS support after POSTing
+            var links = CreateLinksForAuthor(authorToReturn.Id, null);
+            var dic = authorToReturn.ShapeData_v2(null) as IDictionary<string, object>;
+            dic.Add("links", links);
+
+            //return CreatedAtRoute("GetAuthor",
+            //    new { authorId = authorToReturn.Id },
+            //    authorToReturn);
             return CreatedAtRoute("GetAuthor",
-                new { authorId = authorToReturn.Id },
-                authorToReturn);
+                   new { authorId = dic["Id"] },
+                   dic);
+
+
         }
 
         [HttpOptions]
