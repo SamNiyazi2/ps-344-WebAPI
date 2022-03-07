@@ -4,6 +4,7 @@ using CourseLibrary.API.Models;
 using CourseLibrary.API.ResourceParameters;
 using CourseLibrary.API.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Net.Http.Headers;
 using System;
 using System.Collections.Generic;
 using System.Dynamic;
@@ -18,6 +19,7 @@ namespace CourseLibrary.API.Controllers
     [Route("api/authors")]
     public class AuthorsController : ControllerBase
     {
+
         private readonly ICourseLibraryRepository _courseLibraryRepository;
         private readonly IMapper _mapper;
 
@@ -38,11 +40,16 @@ namespace CourseLibrary.API.Controllers
         // 03/05/2022 02:49 pm - SSN - [20220305-1446] - [002] - M04-04 - Demo - Data shaping collection resources
         //public ActionResult<IEnumerable<AuthorDto>> GetAuthors(
         public ActionResult GetAuthors(
-            [FromQuery] AuthorsResourceParameters authorsResourceParameters)
+            [FromQuery] AuthorsResourceParameters authorsResourceParameters, [FromHeader(Name = "Accept")] string mediaType)
         {
 
             try
             {
+
+                if (!MediaTypeHeaderValue.TryParse(mediaType, out MediaTypeHeaderValue parsedMediaType))
+                {
+                    return ValidationProblem($"ps-344-webAPI-20220306-2327: Invalid media type [{mediaType}]");
+                }
 
                 var authorsFromRepo = _courseLibraryRepository.GetAuthors(authorsResourceParameters);
 
@@ -65,30 +72,38 @@ namespace CourseLibrary.API.Controllers
                 #endregion [20220304-2120] 
 
 
-                // 03/06/2022 09:06 pm - SSN - [20220306-2054] - [003] - M05-06 - Demo - Implementing HATEOAS support for collection resource
-                var links = createLinksForAuthors(authorsResourceParameters, authorsFromRepo.HasPreviousPage, authorsFromRepo.HasNextPage);
-                var shapedAuthors = _mapper.Map<IEnumerable<AuthorDto>>(authorsFromRepo).ShapeData_v2(authorsResourceParameters.Fields);
-
-                var shapedAuthorsWithLinks = shapedAuthors.Select(author =>
-                      {
-                          var authorAsDic = author as IDictionary<string, object>;
-                          var authorLinks = CreateLinksForAuthor((Guid)authorAsDic["Id"], null);
-                          authorAsDic.Add("links", authorLinks);
-                          return authorAsDic;
-                      });
-
-                // 03/06/2022 05:33 pm - SSN - [20220305-1512] - [006] - M04-05 - Demo - Data shaping single resources
-                // return Ok(_mapper.Map<IEnumerable<AuthorDto>>(authorsFromRepo).ShapeData(authorsResourceParameters.Fields));
-
-                // return Ok(_mapper.Map<IEnumerable<AuthorDto>>(authorsFromRepo).ShapeData_v2(authorsResourceParameters.Fields));
-                var linkedCollectionResource = new
+                if (parsedMediaType.MediaType == Constants.MEDIA_TYPE_APPLICATION_VND_MARGIN_HATEOAS_JSON)
                 {
-                    value = shapedAuthorsWithLinks,
-                    links
-                };
 
-                // return Ok(_mapper.Map<IEnumerable<AuthorDto>>(authorsFromRepo).ShapeData_v2(authorsResourceParameters.Fields));
-                return Ok(linkedCollectionResource);
+                    // 03/06/2022 09:06 pm - SSN - [20220306-2054] - [003] - M05-06 - Demo - Implementing HATEOAS support for collection resource
+                    var links = createLinksForAuthors(authorsResourceParameters, authorsFromRepo.HasPreviousPage, authorsFromRepo.HasNextPage);
+                    var shapedAuthors = _mapper.Map<IEnumerable<AuthorDto>>(authorsFromRepo).ShapeData_v2(authorsResourceParameters.Fields);
+
+                    var shapedAuthorsWithLinks = shapedAuthors.Select(author =>
+                          {
+                              var authorAsDic = author as IDictionary<string, object>;
+                              var authorLinks = CreateLinksForAuthor((Guid)authorAsDic["Id"], null);
+                              authorAsDic.Add("links", authorLinks);
+                              return authorAsDic;
+                          });
+
+                    // 03/06/2022 05:33 pm - SSN - [20220305-1512] - [006] - M04-05 - Demo - Data shaping single resources
+                    // return Ok(_mapper.Map<IEnumerable<AuthorDto>>(authorsFromRepo).ShapeData(authorsResourceParameters.Fields));
+
+                    // return Ok(_mapper.Map<IEnumerable<AuthorDto>>(authorsFromRepo).ShapeData_v2(authorsResourceParameters.Fields));
+                    var linkedCollectionResource = new
+                    {
+                        value = shapedAuthorsWithLinks,
+                        links
+                    };
+
+                    // return Ok(_mapper.Map<IEnumerable<AuthorDto>>(authorsFromRepo).ShapeData_v2(authorsResourceParameters.Fields));
+                    return Ok(linkedCollectionResource);
+                }
+                else
+                {
+                    return Ok(_mapper.Map<IEnumerable<AuthorDto>>(authorsFromRepo).ShapeData_v2(authorsResourceParameters.Fields));
+                }
 
             }
             catch (Exception ex)
@@ -102,12 +117,19 @@ namespace CourseLibrary.API.Controllers
         [HttpGet("{authorId}", Name = "GetAuthor")]
         // 03/06/2022 04:46 pm - SSN - [20220305-1512] - [002] - M04-05 - Demo - Data shaping single resources
         // Add fields
-        public IActionResult GetAuthor(Guid authorId, string fields)
+        // 03/06/2022 10:08 pm - SSN - [20220306-2206] - [001] - M06-04 - Demo - HATEOAS and content negotiation
+        // Get Accept header
+        public IActionResult GetAuthor(Guid authorId, string fields, [FromHeader(Name = "Accept")] string mediaType)
         {
             // 03/06/2022 06:41 pm - SSN - [20220306-1816] - [001] - M04-06 - Demo - Taking consumer errors into account when shaping data
             // Add try/catch block
             try
             {
+                if (!MediaTypeHeaderValue.TryParse(mediaType, out MediaTypeHeaderValue parsedMediaType))
+                {
+                    return ValidationProblem($"ps-344-webAPI-20220306-2213: Invalid media type [{mediaType}]");
+                }
+
                 var authorFromRepo = _courseLibraryRepository.GetAuthor(authorId);
 
                 if (authorFromRepo == null)
@@ -115,18 +137,27 @@ namespace CourseLibrary.API.Controllers
                     return NotFound();
                 }
 
-                // 03/06/2022 08:07 pm - SSN - [20220306-1937] - [003] - M05-04 - Demo - Implementing HATEOAS support for a single resource
-                var links = CreateLinksForAuthor(authorId, fields);
+                // 03/06/2022 10:18 pm - SSN - [20220306-2206] - [003] - M06-04 - Demo - HATEOAS and content negotiation
+                if (parsedMediaType.MediaType == Constants.MEDIA_TYPE_APPLICATION_VND_MARGIN_HATEOAS_JSON)
+                {
 
-                // 03/06/2022 04:47 pm - SSN - [20220305-1512] - [003] - M04-05 - Demo - Data shaping single resources
-                // return Ok(_mapper.Map<AuthorDto>(authorFromRepo));
 
-                //return Ok(_mapper.Map<AuthorDto>(authorFromRepo).ShapeData_v2(fields));
-                var dic = _mapper.Map<AuthorDto>(authorFromRepo).ShapeData_v2(fields) as IDictionary<string, object>;
-                dic.Add("links", links);
+                    // 03/06/2022 08:07 pm - SSN - [20220306-1937] - [003] - M05-04 - Demo - Implementing HATEOAS support for a single resource
+                    var links = CreateLinksForAuthor(authorId, fields);
 
-                return Ok(dic);
+                    // 03/06/2022 04:47 pm - SSN - [20220305-1512] - [003] - M04-05 - Demo - Data shaping single resources
+                    // return Ok(_mapper.Map<AuthorDto>(authorFromRepo));
 
+                    //return Ok(_mapper.Map<AuthorDto>(authorFromRepo).ShapeData_v2(fields));
+                    var dic = _mapper.Map<AuthorDto>(authorFromRepo).ShapeData_v2(fields) as IDictionary<string, object>;
+                    dic.Add("links", links);
+
+                    return Ok(dic);
+                }
+                else
+                {
+                    return Ok(_mapper.Map<AuthorDto>(authorFromRepo).ShapeData_v2(fields));
+                }
             }
             catch (Exception ex)
             {
@@ -137,26 +168,38 @@ namespace CourseLibrary.API.Controllers
         }
 
         [HttpPost(Name = "CreateAuthor")]
-        public ActionResult<AuthorDto> CreateAuthor(AuthorForCreationDto author)
+        // 03/06/2022 11:16 pm - SSN - [20220306-2206] - [006] - M06-04 - Demo - HATEOAS and content negotiation
+        public ActionResult<AuthorDto> CreateAuthor(AuthorForCreationDto author, [FromHeader(Name = "Accept")] string mediaType)
         {
+            if (!MediaTypeHeaderValue.TryParse(mediaType, out MediaTypeHeaderValue parsedMediaType))
+            {
+                return ValidationProblem($"ps-344-webAPI-20220306-2317: Invalid media type [{mediaType}]");
+            }
+
             var authorEntity = _mapper.Map<Entities.Author>(author);
             _courseLibraryRepository.AddAuthor(authorEntity);
             _courseLibraryRepository.Save();
 
             var authorToReturn = _mapper.Map<AuthorDto>(authorEntity);
 
-            // 03/06/2022 08:23 pm - SSN - [20220306-2018] - [001] - M05-05 - Demo - Implementng HATEOAS support after POSTing
-            var links = CreateLinksForAuthor(authorToReturn.Id, null);
-            var dic = authorToReturn.ShapeData_v2(null) as IDictionary<string, object>;
-            dic.Add("links", links);
+            if (parsedMediaType.MediaType == Constants.MEDIA_TYPE_APPLICATION_VND_MARGIN_HATEOAS_JSON)
+            {
+                // 03/06/2022 08:23 pm - SSN - [20220306-2018] - [001] - M05-05 - Demo - Implementng HATEOAS support after POSTing
+                var links = CreateLinksForAuthor(authorToReturn.Id, null);
+                var dic = authorToReturn.ShapeData_v2(null) as IDictionary<string, object>;
+                dic.Add("links", links);
 
-            //return CreatedAtRoute("GetAuthor",
-            //    new { authorId = authorToReturn.Id },
-            //    authorToReturn);
+                //return CreatedAtRoute("GetAuthor",
+                //    new { authorId = authorToReturn.Id },
+                //    authorToReturn);
+                return CreatedAtRoute("GetAuthor",
+                       new { authorId = dic["Id"] },
+                       dic);
+            }
+
             return CreatedAtRoute("GetAuthor",
-                   new { authorId = dic["Id"] },
-                   dic);
-
+                new { authorId = authorToReturn.Id },
+                authorToReturn);
 
         }
 

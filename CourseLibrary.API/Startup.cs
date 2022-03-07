@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -12,6 +13,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json.Serialization;
 using System;
+using System.Linq;
 
 namespace CourseLibrary.API
 {
@@ -81,6 +83,24 @@ namespace CourseLibrary.API
                     };
                 };
             });
+
+
+            // 03/06/2022 10:34 pm - SSN - [20220306-2206] - [004] - M06-04 - Demo - HATEOAS and content negotiation
+            services.Configure<MvcOptions>(config =>
+            {
+                // using using Microsoft.AspNetCore.Mvc.Formatters;
+                // using System.Linq
+                var newtonsoftJsonOutputFormatter = config.OutputFormatters.OfType<NewtonsoftJsonOutputFormatter>()?.FirstOrDefault();
+
+                if (newtonsoftJsonOutputFormatter != null)
+                {
+                    newtonsoftJsonOutputFormatter.SupportedMediaTypes.Add(Helpers.Constants.MEDIA_TYPE_APPLICATION_VND_MARGIN_HATEOAS_JSON);
+                }
+
+            });
+
+
+
 
             // 03/05/2022 09:43 am - SSN - [20220305-0715] - [007] - M03-05 - Creating a property mapping service
             // services.AddTransient<IPropertyMappingService, PropertyMappingService>();
