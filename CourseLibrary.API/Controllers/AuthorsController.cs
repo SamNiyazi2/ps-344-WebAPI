@@ -114,6 +114,20 @@ namespace CourseLibrary.API.Controllers
 
         }
 
+        private static string x(string content)
+        {
+            return content;
+        }
+
+        // 03/07/2022 11:40 am - SSN - [20220307-1105] - [004] - M06-06 - Demo - Tightening the contract between client and server with vendor-specific media types
+        [ActionFilters.ProducesActionFilter(
+
+                    //Constants.MEDIA_TYPE_APPLICATION_VND_MARGIN_HATEOAS_JSON,  Added as a global setting.
+                    Constants.MEDIA_TYPE_APPLICATION_VND_MARVIN_AUTHOR_FULL_JSON,
+                    Constants.MEDIA_TYPE_APPLICATION_VND_MARVIN_AUTHOR_FULL_HATEOAS_JSON,
+                    Constants.MEDIA_TYPE_APPLICATION_VND_MARVIN_AUTHOR_FRIENDLY_JSON,
+                    Constants.MEDIA_TYPE_APPLICATION_VND_MARVIN_AUTHOR_FRIENDLY_HATEOAS_JSON
+                    )]
         [HttpGet("{authorId}", Name = "GetAuthor")]
         // 03/06/2022 04:46 pm - SSN - [20220305-1512] - [002] - M04-05 - Demo - Data shaping single resources
         // Add fields
@@ -125,6 +139,7 @@ namespace CourseLibrary.API.Controllers
             // Add try/catch block
             try
             {
+
                 if (!MediaTypeHeaderValue.TryParse(mediaType, out MediaTypeHeaderValue parsedMediaType))
                 {
                     return ValidationProblem($"ps-344-webAPI-20220306-2213: Invalid media type [{mediaType}]");
@@ -137,27 +152,56 @@ namespace CourseLibrary.API.Controllers
                     return NotFound();
                 }
 
-                // 03/06/2022 10:18 pm - SSN - [20220306-2206] - [003] - M06-04 - Demo - HATEOAS and content negotiation
-                if (parsedMediaType.MediaType == Constants.MEDIA_TYPE_APPLICATION_VND_MARGIN_HATEOAS_JSON)
+
+                // 03/07/2022 11:11 am - SSN - [20220307-1105] - [003] - M06-06 - Demo - Tightening the contract between client and server with vendor-specific media types
+                var includeLinks = parsedMediaType.SubTypeWithoutSuffix.EndsWith("hateoas", StringComparison.InvariantCultureIgnoreCase);
+
+                IEnumerable<LinkDTO> links = new List<LinkDTO>();
+
+                if (includeLinks)
                 {
+                    links = CreateLinksForAuthor(authorId, fields);
+                }
 
 
+                var primaryMediaType = includeLinks ? parsedMediaType.SubTypeWithoutSuffix.Substring(0, parsedMediaType.SubTypeWithoutSuffix.Length - 8) : parsedMediaType.SubTypeWithoutSuffix;
+
+
+                if (primaryMediaType == Constants.MEDIA_TYPE_APPLICATION_VND_MARVIN_AUTHOR_FULL_JSON.SubTypeWithoutSuffix_STRING())
+                {
+                    var dic = _mapper.Map<AuthorFullDTO>(authorFromRepo).ShapeData_v2(fields) as IDictionary<string, object>;
+
+                    if (includeLinks) dic.Add("links", links);
+
+                    return Ok(dic);
+                }
+
+
+
+                //  Make default.
+
+                // 03/06/2022 10:18 pm - SSN - [20220306-2206] - [003] - M06-04 - Demo - HATEOAS and content negotiation
+                // if (parsedMediaType.MediaType == Constants.MEDIA_TYPE_APPLICATION_VND_MARGIN_HATEOAS_JSON)
+                {
                     // 03/06/2022 08:07 pm - SSN - [20220306-1937] - [003] - M05-04 - Demo - Implementing HATEOAS support for a single resource
-                    var links = CreateLinksForAuthor(authorId, fields);
+                    // [20220307-1105] - [003] 
+                    // var links = CreateLinksForAuthor(authorId, fields);
 
                     // 03/06/2022 04:47 pm - SSN - [20220305-1512] - [003] - M04-05 - Demo - Data shaping single resources
                     // return Ok(_mapper.Map<AuthorDto>(authorFromRepo));
 
                     //return Ok(_mapper.Map<AuthorDto>(authorFromRepo).ShapeData_v2(fields));
                     var dic = _mapper.Map<AuthorDto>(authorFromRepo).ShapeData_v2(fields) as IDictionary<string, object>;
-                    dic.Add("links", links);
+
+
+                    if (includeLinks) dic.Add("links", links);
 
                     return Ok(dic);
                 }
-                else
-                {
-                    return Ok(_mapper.Map<AuthorDto>(authorFromRepo).ShapeData_v2(fields));
-                }
+                //else
+                //{
+                //    return Ok(_mapper.Map<AuthorDto>(authorFromRepo).ShapeData_v2(fields));
+                //}
             }
             catch (Exception ex)
             {

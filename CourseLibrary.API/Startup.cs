@@ -33,6 +33,10 @@ namespace CourseLibrary.API
             {
                 setupAction.ReturnHttpNotAcceptable = true;
 
+                //// 03/07/2022 02:56 pm - SSN - [20220307-1105] - [010] - M06-06 - Demo - Tightening the contract between client and server with vendor-specific media types
+                // We are using as an attribute.
+                //setupAction.Filters.Add(new ActionFilters.ProducesActionFilter());
+
             }).AddNewtonsoftJson(setupAction =>
              {
                  setupAction.SerializerSettings.ContractResolver =
@@ -107,6 +111,12 @@ namespace CourseLibrary.API
             services.AddSingleton<IPropertyMappingService, PropertyMappingService>();
 
 
+
+
+            // 03/07/2022 12:47 pm - SSN - [20220307-1105] - [006] - M06-06 - Demo - Tightening the contract between client and server with vendor-specific media types
+            services.AddTransient<IHttpContextAccessor, HttpContextAccessor>();
+
+
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
             services.AddScoped<ICourseLibraryRepository, CourseLibraryRepository>();
@@ -143,6 +153,15 @@ namespace CourseLibrary.API
                 });
 
             }
+
+
+
+
+            // 03/07/2022 12:59 pm - SSN - [20220307-1105] - [008] - M06-06 - Demo - Tightening the contract between client and server with vendor-specific media types
+            Helpers.HttpHelper.Configure(app.ApplicationServices.GetService<IHttpContextAccessor>());
+
+
+
 
             app.UseRouting();
 

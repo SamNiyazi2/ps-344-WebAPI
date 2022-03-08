@@ -13,13 +13,17 @@ namespace CourseLibrary.API.Profiles
         {
             CreateMap<Entities.Author, Models.AuthorDto>()
                 .ForMember(
-                    dest => dest.Name, 
+                    dest => dest.Name,
                     opt => opt.MapFrom(src => $"{src.FirstName} {src.LastName}"))
                 .ForMember(
-                    dest => dest.Age, 
+                    dest => dest.Age,
                     opt => opt.MapFrom(src => src.DateOfBirth.GetCurrentAge()));
 
             CreateMap<Models.AuthorForCreationDto, Entities.Author>();
+
+            // 03/07/2022 11:09 am - SSN - [20220307-1105] - [002] - M06-06 - Demo - Tightening the contract between client and server with vendor-specific media types
+            CreateMap<Entities.Author, Models.AuthorFullDTO>();
+
         }
     }
 }
