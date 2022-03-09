@@ -198,6 +198,11 @@ namespace CourseLibrary.API
             Helpers.HttpHelper.Configure(app.ApplicationServices.GetService<IHttpContextAccessor>());
 
 
+            // https://docs.microsoft.com/en-us/aspnet/core/performance/caching/middleware?view=aspnetcore-6.0
+            // UseCors must be called before UseResponseCaching
+            //app.UseCors();
+
+
             // 03/08/2022 06:58 pm - SSN - [20220308-1856] - [002] - M07-06 - Demo - Adding a cache store with the ResponseCaching middleware
             // Must be added before routing and endpoints.
             app.UseResponseCaching();
