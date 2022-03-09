@@ -18,7 +18,9 @@ namespace CourseLibrary.API.Controllers
     [Route("api/authors/{authorId}/courses")]
 
     // 03/08/2022 07:32 pm - SSN - [20220308-1922] - [003] - M07-07 - Demo - Using cache profiles to apply the same rules to different resources
-    [ResponseCache(CacheProfileName = Helpers.Constants.CACHE_PROFILE_NAME_240_SECONDS)]
+    // 03/09/2022 09:37 am - SSN - [20220309-0924] - [003] - M08-03 - Demo - Adding support for generating ETags
+    // Added HttpCacheHeader.  Remove this.
+    //    [ResponseCache(CacheProfileName = Helpers.Constants.CACHE_PROFILE_NAME_240_SECONDS)]
     public class CoursesController : ControllerBase
     {
         private readonly ICourseLibraryRepository _courseLibraryRepository;
@@ -48,7 +50,9 @@ namespace CourseLibrary.API.Controllers
         [HttpGet("{courseId}", Name = "GetCourseForAuthor")]
 
         // 03/08/2022 06:33 pm - SSN - [20220308-1840] - [001] - M07-05 - Demo - Adding cache headers to the response
-        [ResponseCache(Duration = 120)]
+        // 03/09/2022 09:39 am - SSN - [20220309-0924] - [004] - M08-03 - Demo - Adding support for generating ETags
+        // Added HttpCacheHeaders. Remove this.
+        //        [ResponseCache(Duration = 120)]
         public ActionResult<CourseDto> GetCourseForAuthor(Guid authorId, Guid courseId)
         {
             if (!_courseLibraryRepository.AuthorExists(authorId))

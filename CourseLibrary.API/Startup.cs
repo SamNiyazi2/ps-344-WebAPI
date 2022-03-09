@@ -30,25 +30,29 @@ namespace CourseLibrary.API
         public void ConfigureServices(IServiceCollection services)
         {
 
+            // 03/09/2022 09:32 am - SSN - [20220309-0924] - [001] - M08-03 - Demo - Adding support for generating ETags
+            services.AddHttpCacheHeaders();
+
+
             // 03/08/2022 06:57 pm - SSN - [20220308-1856] - [001] - M07-06 - Demo - Adding a cache store with the ResponseCaching middleware
             services.AddResponseCaching();
 
 
             services.AddControllers(setupAction =>
             {
-            setupAction.ReturnHttpNotAcceptable = true;
+                setupAction.ReturnHttpNotAcceptable = true;
 
-            //// 03/07/2022 02:56 pm - SSN - [20220307-1105] - [010] - M06-06 - Demo - Tightening the contract between client and server with vendor-specific media types
-            // We are using as an attribute.
-            //setupAction.Filters.Add(new ActionFilters.ProducesActionFilter());
+                //// 03/07/2022 02:56 pm - SSN - [20220307-1105] - [010] - M06-06 - Demo - Tightening the contract between client and server with vendor-specific media types
+                // We are using as an attribute.
+                //setupAction.Filters.Add(new ActionFilters.ProducesActionFilter());
 
 
-            // 03/08/2022 07:26 pm - SSN - [20220308-1922] - [001] - M07-07 - Demo - Using cache profiles to apply the same rules to different resources
-            setupAction.CacheProfiles.Add(
+                // 03/08/2022 07:26 pm - SSN - [20220308-1922] - [001] - M07-07 - Demo - Using cache profiles to apply the same rules to different resources
+                setupAction.CacheProfiles.Add(
 
-                                Helpers.Constants.CACHE_PROFILE_NAME_240_SECONDS,
-                                new CacheProfile() { Duration = 240 }
-                );
+                                    Helpers.Constants.CACHE_PROFILE_NAME_240_SECONDS,
+                                    new CacheProfile() { Duration = 240 }
+                    );
 
 
             }).AddNewtonsoftJson(setupAction =>
@@ -178,6 +182,14 @@ namespace CourseLibrary.API
             // 03/08/2022 06:58 pm - SSN - [20220308-1856] - [002] - M07-06 - Demo - Adding a cache store with the ResponseCaching middleware
             // Must be added before routing and endpoints.
             app.UseResponseCaching();
+
+
+
+            // 03/09/2022 09:34 am - SSN - [20220309-0924] - [002] - M08-03 - Demo - Adding support for generating ETags
+            // Must be after UseResponseCaching and before routing.
+            app.UseHttpCacheHeaders();
+
+
 
 
             app.UseRouting();
