@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using CourseLibrary.API.Models;
 using CourseLibrary.API.Services;
+using Marvin.Cache.Headers;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
@@ -21,6 +22,11 @@ namespace CourseLibrary.API.Controllers
     // 03/09/2022 09:37 am - SSN - [20220309-0924] - [003] - M08-03 - Demo - Adding support for generating ETags
     // Added HttpCacheHeader.  Remove this.
     //    [ResponseCache(CacheProfileName = Helpers.Constants.CACHE_PROFILE_NAME_240_SECONDS)]
+
+    // 03/09/2022 11:05 am - SSN - [20220309-1042] - [002] - M08-05 - Demo - Resource-level cache header configuration
+    // This overrides global defaults. Add max-age
+    [HttpCacheExpiration(CacheLocation = CacheLocation.Public, MaxAge = 33)]
+    [HttpCacheValidation(MustRevalidate = true)]
     public class CoursesController : ControllerBase
     {
         private readonly ICourseLibraryRepository _courseLibraryRepository;
@@ -53,6 +59,10 @@ namespace CourseLibrary.API.Controllers
         // 03/09/2022 09:39 am - SSN - [20220309-0924] - [004] - M08-03 - Demo - Adding support for generating ETags
         // Added HttpCacheHeaders. Remove this.
         //        [ResponseCache(Duration = 120)]
+        // 03/09/2022 11:00 am - SSN - [20220309-1042] - [001] - M08-05 - Demo - Resource-level cache header configuration
+        [HttpCacheExpiration(CacheLocation = CacheLocation.Public, MaxAge = 43)]
+        [HttpCacheValidation(MustRevalidate = false)]
+
         public ActionResult<CourseDto> GetCourseForAuthor(Guid authorId, Guid courseId)
         {
             if (!_courseLibraryRepository.AuthorExists(authorId))
