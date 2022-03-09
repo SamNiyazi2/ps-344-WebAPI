@@ -39,6 +39,7 @@ namespace CourseLibrary.API
                             // Will not be cached for using Private store.
                             // Will not be cached for using Private store.
                             // Will not be cached for using Private store.
+                            // Will not be cached for using Private store.
                             expirationModelOptions.MaxAge = 56;
                             expirationModelOptions.CacheLocation = Marvin.Cache.Headers.CacheLocation.Private;
                         }
