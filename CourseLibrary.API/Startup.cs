@@ -31,7 +31,26 @@ namespace CourseLibrary.API
         {
 
             // 03/09/2022 09:32 am - SSN - [20220309-0924] - [001] - M08-03 - Demo - Adding support for generating ETags
-            services.AddHttpCacheHeaders();
+            services.AddHttpCacheHeaders(
+
+                        expirationModelOptions =>
+                        {
+                            // 03/09/2022 10:19 am - SSN - [20220309-1001] - [001] - M08-04 - Global caching header configuration
+                            // Will not be cached for using Private store.
+                            // Will not be cached for using Private store.
+                            // Will not be cached for using Private store.
+                            expirationModelOptions.MaxAge = 56;
+                            expirationModelOptions.CacheLocation = Marvin.Cache.Headers.CacheLocation.Private;
+                        }
+                        ,
+                        validateModelOptions =>
+                        {
+                            // Adds "must-revalidate" to Cache-Control header
+                            validateModelOptions.MustRevalidate = true;
+                        }
+
+                        );
+
 
 
             // 03/08/2022 06:57 pm - SSN - [20220308-1856] - [001] - M07-06 - Demo - Adding a cache store with the ResponseCaching middleware
