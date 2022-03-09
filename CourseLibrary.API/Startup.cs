@@ -29,6 +29,11 @@ namespace CourseLibrary.API
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+
+            // 03/08/2022 06:57 pm - SSN - [20220308-1856] - [001] - M07-06 - Demo - Adding a cache store with the ResponseCaching middleware
+            services.AddResponseCaching();
+
+
             services.AddControllers(setupAction =>
             {
                 setupAction.ReturnHttpNotAcceptable = true;
@@ -161,6 +166,9 @@ namespace CourseLibrary.API
             Helpers.HttpHelper.Configure(app.ApplicationServices.GetService<IHttpContextAccessor>());
 
 
+            // 03/08/2022 06:58 pm - SSN - [20220308-1856] - [002] - M07-06 - Demo - Adding a cache store with the ResponseCaching middleware
+            // Must be added before routing and endpoints.
+            app.UseResponseCaching();
 
 
             app.UseRouting();

@@ -43,6 +43,9 @@ namespace CourseLibrary.API.Controllers
         }
 
         [HttpGet("{courseId}", Name = "GetCourseForAuthor")]
+
+        // 03/08/2022 06:33 pm - SSN - [20220308-1840] - [001] - M07-05 - Demo - Adding cache headers to the response
+        [ResponseCache(Duration = 120)]
         public ActionResult<CourseDto> GetCourseForAuthor(Guid authorId, Guid courseId)
         {
             if (!_courseLibraryRepository.AuthorExists(authorId))
