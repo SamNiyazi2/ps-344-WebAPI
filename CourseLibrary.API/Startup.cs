@@ -36,11 +36,20 @@ namespace CourseLibrary.API
 
             services.AddControllers(setupAction =>
             {
-                setupAction.ReturnHttpNotAcceptable = true;
+            setupAction.ReturnHttpNotAcceptable = true;
 
-                //// 03/07/2022 02:56 pm - SSN - [20220307-1105] - [010] - M06-06 - Demo - Tightening the contract between client and server with vendor-specific media types
-                // We are using as an attribute.
-                //setupAction.Filters.Add(new ActionFilters.ProducesActionFilter());
+            //// 03/07/2022 02:56 pm - SSN - [20220307-1105] - [010] - M06-06 - Demo - Tightening the contract between client and server with vendor-specific media types
+            // We are using as an attribute.
+            //setupAction.Filters.Add(new ActionFilters.ProducesActionFilter());
+
+
+            // 03/08/2022 07:26 pm - SSN - [20220308-1922] - [001] - M07-07 - Demo - Using cache profiles to apply the same rules to different resources
+            setupAction.CacheProfiles.Add(
+
+                                Helpers.Constants.CACHE_PROFILE_NAME_240_SECONDS,
+                                new CacheProfile() { Duration = 240 }
+                );
+
 
             }).AddNewtonsoftJson(setupAction =>
              {

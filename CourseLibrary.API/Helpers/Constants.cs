@@ -22,5 +22,8 @@ namespace CourseLibrary.API.Helpers
         public const string MEDIA_TYPE_APPLICATION_VND_MARVIN_AUTHOR_FOR_CREATION_JSON = "application/vnd.marvin.authorforcreation+json";
         public const string MEDIA_TYPE_APPLICATION_VND_MARVIN_AUTHOR_FOR_CREATION_WITH_DATEOFDEATH_JSON = "application/vnd.marvin.authorforcreationwithdateofdeath+json";
 
+        // 03/08/2022 07:28 pm - SSN - [20220308-1922] - [002] - M07-07 - Demo - Using cache profiles to apply the same rules to different resources
+        public const string CACHE_PROFILE_NAME_240_SECONDS = "CacheProfileName_240seconds";
+
     }
 }

@@ -16,6 +16,9 @@ namespace CourseLibrary.API.Controllers
 {
     [ApiController]
     [Route("api/authors/{authorId}/courses")]
+
+    // 03/08/2022 07:32 pm - SSN - [20220308-1922] - [003] - M07-07 - Demo - Using cache profiles to apply the same rules to different resources
+    [ResponseCache(CacheProfileName = Helpers.Constants.CACHE_PROFILE_NAME_240_SECONDS)]
     public class CoursesController : ControllerBase
     {
         private readonly ICourseLibraryRepository _courseLibraryRepository;
