@@ -28,13 +28,17 @@ namespace CourseLibrary.API.ActionFilters
 
         public void OnActionExecuting(ActionExecutingContext context)
         {
-            var acceptHeaderEntry = Helpers.HttpHelper.httpContext?.Request.Headers.FirstOrDefault(r => r.Key == "Accept");
+            //var acceptHeaderEntry = Helpers.HttpHelper.httpContext?.Request.Headers.FirstOrDefault(r => r.Key == "Accept");
+            var acceptHeaderEntry = context.HttpContext.Request.Headers.FirstOrDefault(r => r.Key == "Accept");
 
-            MediaTypeHeaderValue contentType = mediaTypes.FirstOrDefault(r => r.MediaType == acceptHeaderEntry.Value.Value);
+            // MediaTypeHeaderValue contentType = mediaTypes.FirstOrDefault(r => r.MediaType == acceptHeaderEntry.Value.Value);
+            MediaTypeHeaderValue contentType = mediaTypes.FirstOrDefault(r => r.MediaType == acceptHeaderEntry.Value);
+
             if (contentType == null) return;
 
             // New response. No need to check if entry exists.
-            Helpers.HttpHelper.httpContext?.Response.Headers.Add("Content-Type", contentType.MediaType);
+            // Helpers.HttpHelper.httpContext?.Response.Headers.Add("Content-Type", contentType.MediaType);
+            context.HttpContext.Response.Headers.Add("Content-Type", contentType.MediaType);
 
         }
     }

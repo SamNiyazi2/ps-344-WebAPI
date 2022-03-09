@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using CourseLibrary.API.ActionConstraints;
 using CourseLibrary.API.Helpers;
 using CourseLibrary.API.Models;
 using CourseLibrary.API.ResourceParameters;
@@ -114,10 +115,6 @@ namespace CourseLibrary.API.Controllers
 
         }
 
-        private static string x(string content)
-        {
-            return content;
-        }
 
         // 03/07/2022 11:40 am - SSN - [20220307-1105] - [004] - M06-06 - Demo - Tightening the contract between client and server with vendor-specific media types
         [ActionFilters.ProducesActionFilter(
@@ -211,7 +208,21 @@ namespace CourseLibrary.API.Controllers
             }
         }
 
+
+
+
+
         [HttpPost(Name = "CreateAuthor")]
+
+        // 03/08/2022 03:32 pm - SSN - [20220307-2140] - [007] - M06-08 - Demo - Working with vendor-specific media types on input
+
+        [RequestHeaderMatchesMediaType("Content-Type",
+                        Constants.MEDIA_TYPE_APPLICATION_JSON,
+                        Constants.MEDIA_TYPE_APPLICATION_VND_MARVIN_AUTHOR_FOR_CREATION_JSON)]
+
+        [Consumes(Constants.MEDIA_TYPE_APPLICATION_JSON,
+                        Constants.MEDIA_TYPE_APPLICATION_VND_MARVIN_AUTHOR_FOR_CREATION_JSON)]
+
         // 03/06/2022 11:16 pm - SSN - [20220306-2206] - [006] - M06-04 - Demo - HATEOAS and content negotiation
         public ActionResult<AuthorDto> CreateAuthor(AuthorForCreationDto author, [FromHeader(Name = "Accept")] string mediaType)
         {
@@ -246,6 +257,57 @@ namespace CourseLibrary.API.Controllers
                 authorToReturn);
 
         }
+
+
+
+
+
+
+        // 03/08/2022 02:43 pm - SSN - [20220307-2140] - [005] - M06-08 - Demo - Working with vendor-specific media types on input
+
+        [HttpPost(Name = "CreateAuthorWithDateOfDeath")]
+        [RequestHeaderMatchesMediaType("Content-Type",
+                    Constants.MEDIA_TYPE_APPLICATION_VND_MARVIN_AUTHOR_FOR_CREATION_WITH_DATEOFDEATH_JSON)]
+        
+        [Consumes(
+                    Constants.MEDIA_TYPE_APPLICATION_VND_MARVIN_AUTHOR_FOR_CREATION_WITH_DATEOFDEATH_JSON)]
+
+        public ActionResult<AuthorDto> CreateAuthorWithDateOfDeath(AuthorForCreationWithDateOfDeathDTO author, [FromHeader(Name = "Accept")] string mediaType)
+        {
+            if (!MediaTypeHeaderValue.TryParse(mediaType, out MediaTypeHeaderValue parsedMediaType))
+            {
+                return ValidationProblem($"ps-344-webAPI-20220308-1443: Invalid media type [{mediaType}]");
+            }
+
+            var authorEntity = _mapper.Map<Entities.Author>(author);
+            _courseLibraryRepository.AddAuthor(authorEntity);
+            _courseLibraryRepository.Save();
+
+            var authorToReturn = _mapper.Map<AuthorDto>(authorEntity);
+
+            if (parsedMediaType.MediaType == Constants.MEDIA_TYPE_APPLICATION_VND_MARGIN_HATEOAS_JSON)
+            {
+                var links = CreateLinksForAuthor(authorToReturn.Id, null);
+                var dic = authorToReturn.ShapeData_v2(null) as IDictionary<string, object>;
+                dic.Add("links", links);
+
+                return CreatedAtRoute("GetAuthor",
+                       new { authorId = dic["Id"] },
+                       dic);
+            }
+
+            return CreatedAtRoute("GetAuthor",
+                new { authorId = authorToReturn.Id },
+                authorToReturn);
+
+        }
+
+
+
+
+
+
+
 
         [HttpOptions]
         public IActionResult GetAuthorsOptions()
